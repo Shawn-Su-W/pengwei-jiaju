@@ -108,6 +108,89 @@
     .wechat-tip-bar button { border:0; background:#8b4a20; color:#fff; border-radius:999px; padding:5px 10px; margin-left:8px; font-weight:800; }
     @media(max-width:560px) { .wechat-guide-card { margin-top:18px; padding:18px; } .wechat-guide-title { font-size:18px; } .wechat-guide-card p { font-size:14px; } }
 
+
+    /* 购物车功能 */
+    .cart-add-btn { background:#e64340; color:#fff; border:0; border-radius:999px; padding:8px 12px; font-size:13px; font-weight:800; cursor:pointer; white-space:nowrap; }
+    .cart-add-btn:hover { background:#c93632; }
+    .cart-float { position:fixed; right:18px; bottom:22px; z-index:999; background:#e64340; color:#fff; border:0; border-radius:999px; padding:14px 18px; box-shadow:0 10px 28px rgba(0,0,0,.22); font-weight:900; cursor:pointer; display:flex; align-items:center; gap:8px; }
+    .cart-count { min-width:22px; height:22px; border-radius:50%; background:#fff; color:#e64340; display:inline-flex; align-items:center; justify-content:center; font-size:12px; }
+    .cart-mask { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; display:none; }
+    .cart-panel { position:fixed; right:0; top:0; width:390px; max-width:92vw; height:100vh; background:#fff; z-index:1001; transform:translateX(105%); transition:transform .25s ease; box-shadow:-8px 0 30px rgba(0,0,0,.2); display:flex; flex-direction:column; }
+    .cart-panel.open { transform:translateX(0); }
+    .cart-mask.open { display:block; }
+    .cart-header { padding:18px 18px 14px; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between; }
+    .cart-header h3 { font-size:20px; color:#8b4a20; }
+    .cart-close { border:0; background:#f3eee8; color:#8b4a20; border-radius:50%; width:34px; height:34px; font-size:20px; cursor:pointer; }
+    .cart-items { flex:1; overflow:auto; padding:14px 18px; }
+    .cart-empty { color:#999; text-align:center; padding:60px 0; }
+    .cart-item { display:grid; grid-template-columns:64px 1fr; gap:12px; padding:14px 0; border-bottom:1px solid #f0f0f0; }
+    .cart-item img { width:64px; height:64px; object-fit:cover; border-radius:10px; background:#eee2d4; }
+    .cart-item-name { font-weight:800; color:#333; margin-bottom:4px; }
+    .cart-item-code { color:#a9794d; font-size:12px; margin-bottom:6px; }
+    .cart-item-row { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .cart-item-price { color:#e64340; font-weight:900; }
+    .qty-control { display:flex; align-items:center; border:1px solid #e4d3bf; border-radius:999px; overflow:hidden; }
+    .qty-control button { width:28px; height:28px; border:0; background:#fff7ea; color:#8b4a20; font-weight:900; cursor:pointer; }
+    .qty-control span { min-width:32px; text-align:center; font-weight:800; }
+    .remove-btn { border:0; background:transparent; color:#999; font-size:12px; cursor:pointer; margin-top:8px; }
+    .cart-footer { border-top:1px solid #eee; padding:16px 18px calc(16px + env(safe-area-inset-bottom)); background:#fff; }
+    .cart-total { display:flex; align-items:center; justify-content:space-between; font-size:16px; margin-bottom:12px; }
+    .cart-total strong { color:#e64340; font-size:22px; }
+    .cart-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .cart-action { border:0; border-radius:12px; padding:12px 8px; font-weight:900; cursor:pointer; }
+    .cart-action.primary { background:#e64340; color:#fff; }
+    .cart-action.secondary { background:#fff7ea; color:#8b4a20; }
+    .cart-note { font-size:12px; color:#888; margin-top:10px; line-height:1.5; }
+    @media(max-width:560px) {
+      .product-bottom { align-items:flex-start; }
+      .cart-add-btn { padding:7px 10px; }
+      .cart-float { right:14px; bottom:16px; padding:12px 15px; }
+      .cart-panel { width:100vw; max-width:100vw; }
+    }
+  
+
+    /* 商品详情弹窗：点击商品后进入类似选规格页面 */
+    .detail-mask { position:fixed; inset:0; background:rgba(0,0,0,.48); z-index:1100; display:none; align-items:center; justify-content:center; padding:18px; }
+    .detail-mask.open { display:flex; }
+    .detail-modal { width:min(620px, 96vw); max-height:92vh; background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.26); display:flex; flex-direction:column; }
+    .detail-top { position:relative; padding:22px 22px 16px; border-bottom:1px solid #eee; display:grid; grid-template-columns:130px 1fr; gap:18px; align-items:start; }
+    .detail-close { position:absolute; right:16px; top:12px; width:34px; height:34px; border:0; background:#fff; color:#888; font-size:32px; line-height:34px; cursor:pointer; }
+    .detail-img { width:130px; height:130px; border-radius:10px; background:#eee2d4; overflow:hidden; }
+    .detail-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .detail-name { font-size:22px; font-weight:900; line-height:1.35; padding-right:34px; color:#222; }
+    .detail-code { margin-top:4px; color:#a9794d; font-weight:800; font-size:13px; }
+    .detail-price { margin-top:8px; color:#e64340; font-size:24px; font-weight:900; }
+    .detail-body { padding:18px 22px 22px; overflow:auto; flex:1; }
+    .detail-section { border-bottom:1px solid #eee; padding:16px 0; }
+    .detail-section:first-child { padding-top:0; }
+    .detail-label { font-size:17px; font-weight:900; color:#222; margin-bottom:10px; }
+    .detail-desc { font-size:14px; color:#666; line-height:1.7; background:#fff7ea; border-radius:12px; padding:12px; }
+    .spec-list { display:flex; flex-wrap:wrap; gap:10px; }
+    .spec-option { border:1px solid #ddd; background:#fff; color:#333; border-radius:8px; padding:9px 14px; font-size:14px; cursor:pointer; }
+    .spec-option.active { border-color:#e64340; color:#e64340; background:#fff4f4; font-weight:900; }
+    .qty-line { display:flex; align-items:center; gap:14px; }
+    .qty-btn { width:32px; height:32px; border:1px solid #ddd; background:#fff; border-radius:6px; font-size:22px; line-height:28px; cursor:pointer; }
+    .qty-btn.plus { background:#f25555; color:#fff; border-color:#f25555; }
+    .qty-num { min-width:28px; text-align:center; font-size:18px; font-weight:900; }
+    .detail-footer { padding:16px 22px; border-top:1px solid #eee; display:flex; gap:12px; background:#fff; }
+    .detail-footer button { flex:1; border:0; border-radius:10px; height:48px; font-size:16px; font-weight:900; cursor:pointer; }
+    .detail-share { background:#fff0e6; color:#8b4a20; }
+    .detail-confirm { background:#f25555; color:#fff; }
+    .product-card { cursor:pointer; }
+
+    @media(max-width:560px) {
+      .detail-mask { align-items:flex-end; padding:0; }
+      .detail-modal { width:100vw; max-height:92vh; border-radius:18px 18px 0 0; }
+      .detail-top { grid-template-columns:92px 1fr; gap:14px; padding:18px 16px 14px; }
+      .detail-img { width:92px; height:92px; }
+      .detail-name { font-size:18px; padding-right:34px; }
+      .detail-price { font-size:20px; }
+      .detail-body { padding:14px 16px 18px; }
+      .detail-label { font-size:16px; }
+      .spec-option { flex:1; text-align:center; min-width:120px; }
+      .detail-footer { padding:12px 16px calc(12px + env(safe-area-inset-bottom)); }
+    }
+
   </style>
 </head>
 <body>
@@ -529,14 +612,80 @@
       <div class="qr-box">欢迎添加微信：<br><strong>pw13324594992</strong><br>电话：13327594992</div>
     </section>
   </main>
+
+
+
+
+  <div class="detail-mask" id="detailMask" onclick="closeProductDetail()">
+    <section class="detail-modal" onclick="event.stopPropagation()" aria-label="商品详情">
+      <div class="detail-top">
+        <button class="detail-close" onclick="closeProductDetail()">×</button>
+        <div class="detail-img"><img id="detailImg" src="" alt="商品图片"></div>
+        <div>
+          <div class="detail-name" id="detailName">商品名称</div>
+          <div class="detail-code" id="detailCode">#编号</div>
+          <div class="detail-price" id="detailPrice">¥0.00 起</div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div class="detail-section">
+          <div class="detail-label">商品说明</div>
+          <div class="detail-desc" id="detailDesc">商品描述</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">购买规格</div>
+          <div class="spec-list" id="detailSpecs">
+            <button class="spec-option active" type="button" onclick="selectDetailSpec(this)">默认规格</button>
+          </div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-label">购买数量</div>
+          <div class="qty-line">
+            <button class="qty-btn" type="button" onclick="changeDetailQty(-1)">−</button>
+            <span class="qty-num" id="detailQty">1</span>
+            <button class="qty-btn plus" type="button" onclick="changeDetailQty(1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="detail-footer">
+        <button class="detail-share" onclick="copyProductShare()">分享/复制</button>
+        <button class="detail-confirm" onclick="confirmDetailCart()">加入购物车</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="cart-mask" id="cartMask" onclick="closeCart()"></div>
+  <aside class="cart-panel" id="cartPanel" aria-label="购物车">
+    <div class="cart-header">
+      <h3>购物车</h3>
+      <button class="cart-close" onclick="closeCart()">×</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total"><span>合计</span><strong id="cartTotal">¥0.00</strong></div>
+      <div class="cart-actions">
+        <button class="cart-action secondary" onclick="copyCartText()">复制清单</button>
+        <button class="cart-action primary" onclick="callShop()">电话下单</button>
+      </div>
+      <div class="cart-note">提示：当前为展示网站购物车，暂不支持在线支付。复制清单后可通过微信 pw13324594992 发送给店主确认库存、配送和批发价格。</div>
+    </div>
+  </aside>
+  <button class="cart-float" onclick="openCart()">🛒 购物车 <span class="cart-count" id="cartCount">0</span></button>
+
   <footer>© 2026 鹏伟家居｜价格实惠 · 批发零售 · 物流配送</footer>
 
   <div class="mobile-contact-bar">
     <a class="mobile-call" href="tel:13327594992">拨打电话</a>
     <button class="mobile-wechat" onclick="copyWechat()">复制微信</button>
   </div>
+
   <script>
     let currentCategory = 'all';
+    let cart = JSON.parse(localStorage.getItem('pengweiCart') || '[]');
+    let detailProduct = null;
+    let detailQty = 1;
+    let detailSpec = '默认规格';
+
     function filterProducts(category, btn) {
       currentCategory = category;
       document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -544,23 +693,6 @@
       searchProducts();
     }
 
-    function copyWechat() {
-      const wechat = 'pw13324594992';
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(wechat).then(() => alert('微信号已复制：' + wechat)).catch(() => fallbackCopy(wechat));
-      } else {
-        fallbackCopy(wechat);
-      }
-    }
-    function fallbackCopy(text) {
-      const input = document.createElement('input');
-      input.value = text;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      document.body.removeChild(input);
-      alert('微信号已复制：' + text);
-    }
     function searchProducts() {
       const q = document.getElementById('searchInput').value.trim().toLowerCase();
       document.querySelectorAll('.product-card').forEach(card => {
@@ -573,46 +705,209 @@
       });
     }
 
+    function saveCart() {
+      localStorage.setItem('pengweiCart', JSON.stringify(cart));
+      renderCart();
+    }
 
-    function isWeChatBrowser() {
-      return /MicroMessenger/i.test(navigator.userAgent || '');
+    function getCardProduct(card) {
+      const name = card.getAttribute('data-name') || card.querySelector('.product-name')?.textContent.trim() || '商品';
+      const code = card.getAttribute('data-code') || '';
+      const category = card.getAttribute('data-category') || '';
+      const priceText = card.querySelector('.price')?.textContent || '0';
+      const price = Number((priceText.match(/[0-9]+(\.[0-9]+)?/) || ['0'])[0]);
+      const img = card.querySelector('.product-img img')?.getAttribute('src') || '';
+      const desc = card.querySelector('.product-desc')?.textContent.trim() || '';
+      return { id: code || name, code, name, category, price, img, desc };
     }
-    function showWechatGuide() {
-      const guide = document.getElementById('wechatGuide');
-      if (guide) guide.style.display = 'flex';
+
+    function setupCartButtons() {
+      document.querySelectorAll('.product-card').forEach(card => {
+        if (!card.dataset.detailReady) {
+          card.dataset.detailReady = '1';
+          card.addEventListener('click', function(event) {
+            if (event.target.closest('button') || event.target.closest('a')) return;
+            openProductDetail(getCardProduct(card));
+          });
+        }
+        if (card.querySelector('.cart-add-btn')) return;
+        const bottom = card.querySelector('.product-bottom');
+        if (!bottom) return;
+        const btn = document.createElement('button');
+        btn.className = 'cart-add-btn';
+        btn.type = 'button';
+        btn.textContent = '加入购物车';
+        btn.onclick = function(event) {
+          event.stopPropagation();
+          openProductDetail(getCardProduct(card));
+        };
+        bottom.appendChild(btn);
+      });
     }
-    function closeWechatGuide() {
-      const guide = document.getElementById('wechatGuide');
-      if (guide) guide.style.display = 'none';
-    }
-    function hideWechatGuide(event) {
-      if (event && event.target && event.target.id === 'wechatGuide') closeWechatGuide();
-    }
-    function copyCurrentLink() {
-      const link = window.location.href;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(() => alert('网站链接已复制')).catch(() => fallbackCopyLink(link));
+
+    function addToCart(product, qty = 1) {
+      const existing = cart.find(item => item.id === product.id);
+      if (existing) {
+        existing.qty += qty;
       } else {
-        fallbackCopyLink(link);
+        cart.push({ ...product, qty });
       }
+      saveCart();
+      openCart();
     }
-    function fallbackCopyLink(text) {
-      const input = document.createElement('input');
-      input.value = text;
-      document.body.appendChild(input);
-      input.select();
-      document.execCommand('copy');
-      document.body.removeChild(input);
-      alert('网站链接已复制');
-    }
-    window.addEventListener('load', function () {
-      if (isWeChatBrowser()) {
-        const tip = document.getElementById('wechatTipBar');
-        if (tip) tip.style.display = 'block';
-        setTimeout(showWechatGuide, 600);
-      }
-    });
 
+    function openProductDetail(product) {
+      detailProduct = product;
+      detailQty = 1;
+      detailSpec = product.category || '默认规格';
+      document.getElementById('detailImg').src = product.img || '';
+      document.getElementById('detailName').textContent = product.name;
+      document.getElementById('detailCode').textContent = product.code ? '#' + product.code : product.category;
+      document.getElementById('detailPrice').textContent = '¥' + product.price.toFixed(2) + ' 起';
+      document.getElementById('detailDesc').textContent = product.desc || '欢迎咨询具体规格、颜色、库存和配送方式。';
+      document.getElementById('detailQty').textContent = detailQty;
+
+      const specBox = document.getElementById('detailSpecs');
+      const specs = [product.category || '默认规格'];
+      if (product.name.includes('绿色')) specs.push('绿色款');
+      if (product.name.includes('蓝色')) specs.push('蓝色款');
+      if (product.name.includes('彩色')) specs.push('彩色款');
+      if (product.name.includes('加宽') || product.desc.includes('加宽')) specs.push('加宽款');
+      if (product.name.includes('加厚') || product.desc.includes('加厚')) specs.push('加厚款');
+      if (product.name.includes('自动躺平') || product.desc.includes('自动躺平')) specs.push('自动躺平');
+      const uniqueSpecs = [...new Set(specs)];
+      specBox.innerHTML = uniqueSpecs.map((spec, index) => `<button class="spec-option ${index === 0 ? 'active' : ''}" type="button" onclick="selectDetailSpec(this)">${spec}</button>`).join('');
+
+      document.getElementById('detailMask').classList.add('open');
+    }
+
+    function closeProductDetail() {
+      document.getElementById('detailMask').classList.remove('open');
+    }
+
+    function selectDetailSpec(btn) {
+      document.querySelectorAll('#detailSpecs .spec-option').forEach(item => item.classList.remove('active'));
+      btn.classList.add('active');
+      detailSpec = btn.textContent.trim();
+    }
+
+    function changeDetailQty(delta) {
+      detailQty = Math.max(1, detailQty + delta);
+      document.getElementById('detailQty').textContent = detailQty;
+    }
+
+    function confirmDetailCart() {
+      if (!detailProduct) return;
+      const product = { ...detailProduct, id: detailProduct.id + '|' + detailSpec, name: detailProduct.name + '（' + detailSpec + '）' };
+      closeProductDetail();
+      addToCart(product, detailQty);
+    }
+
+    function copyProductShare() {
+      if (!detailProduct) return;
+      const text = `鹏伟家居商品：${detailProduct.code ? '#' + detailProduct.code + ' ' : ''}${detailProduct.name}\n价格：¥${detailProduct.price.toFixed(2)}起\n说明：${detailProduct.desc || ''}\n电话：13327594992\n微信：pw13324594992`;
+      copyText(text, '商品信息已复制，可发送给朋友或微信客服。');
+    }
+
+    function changeQty(id, delta) {
+      const item = cart.find(product => product.id === id);
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(product => product.id !== id);
+      }
+      saveCart();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(product => product.id !== id);
+      saveCart();
+    }
+
+    function renderCart() {
+      const count = cart.reduce((sum, item) => sum + item.qty, 0);
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      document.getElementById('cartCount').textContent = count;
+      document.getElementById('cartTotal').textContent = '¥' + total.toFixed(2);
+
+      const container = document.getElementById('cartItems');
+      if (!cart.length) {
+        container.innerHTML = '<div class="cart-empty">购物车暂无商品</div>';
+        return;
+      }
+
+      container.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          ${item.img ? `<img src="${item.img}" alt="${item.name}">` : '<div></div>'}
+          <div>
+            <div class="cart-item-name">${item.name}</div>
+            <div class="cart-item-code">${item.code ? '#' + item.code + ' · ' : ''}${item.category}</div>
+            <div class="cart-item-row">
+              <div class="cart-item-price">¥${item.price.toFixed(2)}</div>
+              <div class="qty-control">
+                <button onclick="changeQty('${item.id}', -1)">−</button>
+                <span>${item.qty}</span>
+                <button onclick="changeQty('${item.id}', 1)">+</button>
+              </div>
+            </div>
+            <button class="remove-btn" onclick="removeFromCart('${item.id}')">删除</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openCart() {
+      document.getElementById('cartMask').classList.add('open');
+      document.getElementById('cartPanel').classList.add('open');
+      renderCart();
+    }
+
+    function closeCart() {
+      document.getElementById('cartMask').classList.remove('open');
+      document.getElementById('cartPanel').classList.remove('open');
+    }
+
+    function getCartText() {
+      if (!cart.length) return '购物车暂无商品';
+      const lines = ['鹏伟家居选购清单：'];
+      cart.forEach((item, index) => {
+        lines.push(`${index + 1}. ${item.code ? '#' + item.code + ' ' : ''}${item.name} × ${item.qty}，单价 ¥${item.price.toFixed(2)}，小计 ¥${(item.price * item.qty).toFixed(2)}`);
+      });
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      lines.push(`合计：¥${total.toFixed(2)}`);
+      lines.push('联系电话：13327594992');
+      lines.push('微信号：pw13324594992');
+      return lines.join('\n');
+    }
+
+
+    function copyText(text, successMessage) {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => alert(successMessage));
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert(successMessage);
+      }
+    }
+
+    function copyCartText() {
+      copyText(getCartText(), '选购清单已复制，可粘贴到微信发送给店主。');
+    }
+
+    function callShop() {
+      window.location.href = 'tel:13327594992';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      setupCartButtons();
+      renderCart();
+    });
   </script>
+
 </body>
 </html>
