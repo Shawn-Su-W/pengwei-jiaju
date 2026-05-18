@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>鹏伟家居</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif; background:#f7f3ed; color:#333; line-height:1.6; }
+    header { background: linear-gradient(135deg,#8b4a20,#c7894c); color:#fff; padding:42px 18px; text-align:center; }
+    .logo { width:96px; height:96px; border-radius:50%; background:#fff7ea; display:inline-flex; align-items:center; justify-content:center; margin-bottom:14px; box-shadow:0 8px 24px rgba(0,0,0,.18); overflow:hidden; border:3px solid rgba(255,255,255,.8); }
+    .logo img { width:100%; height:100%; object-fit:cover; display:block; }
+    h1 { font-size:34px; margin-bottom:8px; letter-spacing:1px; }
+    .subtitle { font-size:16px; opacity:.95; }
+    nav { position:sticky; top:0; z-index:10; background:rgba(255,255,255,.96); backdrop-filter: blur(8px); border-bottom:1px solid #eee; }
+    .nav-inner { max-width:1180px; margin:0 auto; display:flex; justify-content:center; gap:28px; padding:14px 20px; font-size:15px; overflow:auto; }
+    nav a { color:#654321; text-decoration:none; font-weight:700; white-space:nowrap; }
+    a { color:#8b4a20; text-decoration:none; font-weight:700; }
+    .container { max-width:1180px; margin:0 auto; padding:34px 20px 60px; }
+    .section-title { font-size:24px; color:#8b4a20; margin-bottom:18px; display:flex; align-items:center; gap:10px; }
+    .section-title::before { content:""; width:6px; height:24px; background:#c7894c; border-radius:999px; }
+    .intro-card,.contact-card { background:#fff; border-radius:20px; padding:26px; box-shadow:0 10px 28px rgba(120,80,40,.08); margin-bottom:34px; }
+    .features { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:22px; }
+    .feature { background:#fff7ea; border-radius:16px; padding:18px 14px; text-align:center; color:#7a431f; font-weight:800; }
+    .toolbar { display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .tabs { display:flex; gap:10px; overflow-x:auto; padding-bottom:6px; }
+    .tab { border:1px solid #d9b78e; background:#fff; color:#8b4a20; padding:9px 15px; border-radius:999px; white-space:nowrap; font-weight:700; cursor:pointer; }
+    .tab.active { background:#8b4a20; color:#fff; }
+    .search { min-width:230px; flex:1; max-width:360px; padding:10px 14px; border-radius:999px; border:1px solid #ddc4a8; background:#fff; outline:none; }
+    .product-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+    .product-card { background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 10px 26px rgba(120,80,40,.08); transition:transform .2s ease, box-shadow .2s ease; }
+    .product-card:hover { transform:translateY(-4px); box-shadow:0 16px 34px rgba(120,80,40,.14); }
+    .product-img { width:100%; height:230px; background:#eee2d4; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .product-img img { width:100%; height:100%; object-fit:cover; display:block; }
+    .product-info { padding:18px; }
+    .product-code { color:#a9794d; font-size:13px; font-weight:800; margin-bottom:4px; }
+    .product-name { font-size:18px; font-weight:900; margin-bottom:8px; color:#2d2d2d; }
+    .product-desc { color:#666; font-size:14px; min-height:66px; margin-bottom:12px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .product-bottom { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .price { color:#e64340; font-size:21px; font-weight:900; white-space:nowrap; }
+    .price span { font-size:13px; }
+    .tag { background:#fff0e6; color:#a45720; border-radius:999px; padding:5px 10px; font-size:12px; font-weight:800; white-space:nowrap; }
+    .contact-card { display:grid; grid-template-columns:1.2fr .8fr; gap:24px; align-items:center; margin-top:34px; }
+    .contact-card p { margin-bottom:10px; }
+    .qr-box { background:#fff7ea; border:1px dashed #c7894c; border-radius:18px; padding:28px; text-align:center; color:#8b4a20; font-weight:800; }
+    footer { text-align:center; padding:26px 20px; color:#8a7a6c; background:#efe5d9; font-size:14px; }
+    @media(max-width:900px) { .product-grid{grid-template-columns:repeat(2,1fr)} .features{grid-template-columns:repeat(2,1fr)} .contact-card{grid-template-columns:1fr} }
+    @media(max-width:560px) { header{padding:34px 16px} h1{font-size:28px} .product-grid{grid-template-columns:1fr} .product-img{height:240px} .toolbar{display:block} .search{max-width:none; width:100%; margin-top:12px} }
+
+    /* 移动端增强：手机访问时更像商品目录，底部固定联系栏 */
+    .mobile-contact-bar { display:none; }
+    .copy-btn { border:0; background:#8b4a20; color:#fff; border-radius:999px; padding:8px 14px; font-weight:800; cursor:pointer; }
+    .product-actions { margin-top:12px; display:none; gap:8px; }
+    .product-actions a, .product-actions button { flex:1; border:0; border-radius:999px; padding:9px 10px; font-size:13px; font-weight:800; text-align:center; }
+    .call-mini { background:#e64340; color:#fff; }
+    .wechat-mini { background:#fff0e6; color:#8b4a20; }
+
+    @media(max-width:560px) {
+      html { scroll-behavior:smooth; }
+      body { padding-bottom:76px; }
+      header { padding:24px 14px 22px; }
+      .logo { width:76px; height:76px; margin-bottom:10px; }
+      h1 { font-size:25px; }
+      .subtitle { font-size:13px; line-height:1.5; }
+      nav { top:0; }
+      .nav-inner { padding:11px 12px; gap:18px; }
+      .container { padding:18px 12px 34px; }
+      .intro-card,.contact-card { border-radius:16px; padding:18px; margin-bottom:22px; }
+      .section-title { font-size:21px; margin-bottom:12px; }
+      .features { gap:10px; margin-top:16px; }
+      .feature { padding:12px 8px; font-size:14px; }
+      .toolbar { position:sticky; top:44px; z-index:9; background:#f7f3ed; padding:8px 0 10px; margin-bottom:12px; }
+      .tabs { padding-bottom:8px; }
+      .tab { padding:8px 13px; font-size:14px; }
+      .search { height:42px; font-size:14px; }
+      .product-grid { gap:12px; }
+      .product-card { display:flex; border-radius:14px; box-shadow:0 6px 18px rgba(120,80,40,.08); }
+      .product-card:hover { transform:none; }
+      .product-img { width:118px; height:118px; min-width:118px; }
+      .product-info { padding:12px; flex:1; min-width:0; }
+      .product-code { font-size:11px; margin-bottom:2px; }
+      .product-name { font-size:15px; line-height:1.3; margin-bottom:5px; }
+      .product-desc { font-size:12px; min-height:auto; margin-bottom:8px; -webkit-line-clamp:2; }
+      .price { font-size:18px; }
+      .tag { display:none; }
+      .product-actions { display:flex; }
+      .contact-card { display:block; }
+      .qr-box { padding:16px; margin-top:14px; }
+      footer { font-size:12px; padding:18px 12px 88px; }
+      .mobile-contact-bar { position:fixed; left:0; right:0; bottom:0; z-index:99; display:flex; gap:10px; padding:10px 12px calc(10px + env(safe-area-inset-bottom)); background:rgba(255,255,255,.96); box-shadow:0 -6px 20px rgba(0,0,0,.12); backdrop-filter:blur(8px); }
+      .mobile-contact-bar a, .mobile-contact-bar button { flex:1; border:0; border-radius:999px; height:44px; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:900; text-decoration:none; }
+      .mobile-call { background:#e64340; color:#fff; }
+      .mobile-wechat { background:#8b4a20; color:#fff; }
+    }
+
+
+    /* 微信内打开提示：微信无法被网页强制跳到系统默认浏览器，只能提示用户手动打开 */
+    .wechat-guide-mask { display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,.55); padding:16px; align-items:flex-start; justify-content:center; }
+    .wechat-guide-card { width:min(520px, 100%); margin-top:28px; background:#fff; color:#333; border-radius:18px; padding:20px; box-shadow:0 18px 42px rgba(0,0,0,.25); }
+    .wechat-guide-title { font-size:20px; font-weight:900; color:#8b4a20; margin-bottom:10px; }
+    .wechat-guide-card p { margin:8px 0; font-size:15px; line-height:1.7; }
+    .wechat-steps { background:#fff7ea; border-radius:14px; padding:12px 14px; margin:12px 0; color:#6f3b1b; }
+    .wechat-guide-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:14px; }
+    .wechat-guide-actions button, .wechat-guide-actions a { border:0; border-radius:999px; padding:10px 14px; font-weight:900; font-size:14px; text-decoration:none; cursor:pointer; }
+    .guide-primary { background:#8b4a20; color:#fff; }
+    .guide-secondary { background:#fff0e6; color:#8b4a20; }
+    .wechat-tip-bar { display:none; position:sticky; top:0; z-index:100; background:#fff7ea; color:#6f3b1b; padding:10px 14px; border-bottom:1px solid #ead4bc; font-size:14px; text-align:center; }
+    .wechat-tip-bar button { border:0; background:#8b4a20; color:#fff; border-radius:999px; padding:5px 10px; margin-left:8px; font-weight:800; }
+    @media(max-width:560px) { .wechat-guide-card { margin-top:18px; padding:18px; } .wechat-guide-title { font-size:18px; } .wechat-guide-card p { font-size:14px; } }
+
+  </style>
+</head>
+<body>
+
+  <div id="wechatTipBar" class="wechat-tip-bar">
+    当前在微信内打开。需要用系统浏览器访问时，请点右上角“···”选择“在浏览器打开”。
+    <button onclick="showWechatGuide()">查看方法</button>
+  </div>
+
+  <div id="wechatGuide" class="wechat-guide-mask" onclick="hideWechatGuide(event)">
+    <div class="wechat-guide-card">
+      <div class="wechat-guide-title">微信打开提示</div>
+      <p>微信内置浏览器不允许网页自动跳转到手机默认浏览器，所以不能用代码强制直接打开 Safari、Chrome 或其他默认浏览器。</p>
+      <div class="wechat-steps">
+        <p><strong>操作方法：</strong></p>
+        <p>1. 点击微信右上角 <strong>“···”</strong></p>
+        <p>2. 选择 <strong>“在浏览器打开”</strong></p>
+        <p>3. 即可用手机默认浏览器访问本网站</p>
+      </div>
+      <p>你也可以直接在微信内浏览商品，并使用电话或复制微信号联系店铺。</p>
+      <div class="wechat-guide-actions">
+        <a class="guide-primary" href="tel:13327594992">拨打电话</a>
+        <button class="guide-secondary" onclick="copyWechat()">复制微信号</button>
+        <button class="guide-secondary" onclick="copyCurrentLink()">复制网站链接</button>
+        <button class="guide-secondary" onclick="closeWechatGuide()">继续在微信内浏览</button>
+      </div>
+    </div>
+  </div>
+  <header>
+    <div class="logo"><img src="images/pengwei_logo.jpg" alt="鹏伟家居店铺头像"></div>
+    <h1>鹏伟家居</h1>
+    <p class="subtitle">家居用品 · 生活用品 · 折叠凳椅 · 躺椅 · 线上选购 · 物流配送 · 批发零售</p>
+  </header>
+  <nav><div class="nav-inner"><a href="#about">店铺介绍</a><a href="#products">商品展示</a><a href="#service">服务优势</a><a href="#contact">联系我们</a></div></nav>
+  <main class="container">
+    <section id="about" class="intro-card">
+      <h2 class="section-title">店铺介绍</h2>
+      <p>鹏伟家居主营家居用品、生活日用品、折叠马扎、靠背折叠椅、休闲躺椅等多类实用好物。商品丰富、价格实惠，支持线上选购、物流配送、批发零售，为家庭日常使用、门店进货、摆摊采购和团购采购提供方便省心的一站式选择。</p>
+      <div class="features" id="service"><div class="feature">价格实惠</div><div class="feature">批发零售</div><div class="feature">线上选购</div><div class="feature">物流配送</div></div>
+    </section>
+    <section id="products">
+      <h2 class="section-title">商品展示</h2>
+      <div class="toolbar">
+        <div class="tabs">
+          <button class="tab active" onclick="filterProducts('all', this)">全部商品</button>
+          <button class="tab" onclick="filterProducts('众合马扎', this)">众合马扎</button>
+          <button class="tab" onclick="filterProducts('盈雅躺椅', this)">盈雅躺椅</button>
+        </div>
+        <input class="search" id="searchInput" placeholder="搜索商品名称或编号" oninput="searchProducts()" />
+      </div>
+      <div class="product-grid" id="productGrid">
+
+        <article class="product-card" data-category="众合马扎" data-name="蓝色坐带圆管马扎" data-code="PLA001">
+          <div class="product-img"><img src="images/mazha_PLA001.jpg" alt="蓝色坐带圆管马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PLA001</div>
+            <div class="product-name">蓝色坐带圆管马扎</div>
+            <div class="product-desc">40CM圆形管，蓝色坐带，重量1.50斤/0.75kg。另有1.3斤/0.65kg版本，售价5.40元。</div>
+            <div class="product-bottom"><div class="price">¥5.80<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="绿色坐带圆管马扎" data-code="PLV002">
+          <div class="product-img"><img src="images/mazha_PLV002.jpg" alt="绿色坐带圆管马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PLV002</div>
+            <div class="product-name">绿色坐带圆管马扎</div>
+            <div class="product-desc">40CM圆形管，绿色坐带，重量1.60斤/0.80kg。另有1.30斤/0.65kg版本，售价5.40元。</div>
+            <div class="product-bottom"><div class="price">¥5.80<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="彩色坐带方管马扎" data-code="PC003">
+          <div class="product-img"><img src="images/mazha_PC003.jpg" alt="彩色坐带方管马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PC003</div>
+            <div class="product-name">彩色坐带方管马扎</div>
+            <div class="product-desc">40CM方形管，彩色坐带，重量1.80斤/0.90kg。</div>
+            <div class="product-bottom"><div class="price">¥6.80<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="穿孔防老化坐带马扎" data-code="PC004">
+          <div class="product-img"><img src="images/mazha_PC004.jpg" alt="穿孔防老化坐带马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PC004</div>
+            <div class="product-name">穿孔防老化坐带马扎</div>
+            <div class="product-desc">40CM穿孔防老化坐带，重量2.20斤/1.10kg。</div>
+            <div class="product-bottom"><div class="price">¥8.80<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="精品橡胶坐带马扎" data-code="PC005">
+          <div class="product-img"><img src="images/mazha_PC005.jpg" alt="精品橡胶坐带马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PC005</div>
+            <div class="product-name">精品橡胶坐带马扎</div>
+            <div class="product-desc">40CM精品橡胶坐带，重量2.80斤/1.40kg。</div>
+            <div class="product-bottom"><div class="price">¥10.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="穿孔加宽坐带马扎" data-code="PC006">
+          <div class="product-img"><img src="images/mazha_PC006.jpg" alt="穿孔加宽坐带马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PC006</div>
+            <div class="product-name">穿孔加宽坐带马扎</div>
+            <div class="product-desc">40CM穿孔加宽坐带，重量1.80斤/0.90kg。</div>
+            <div class="product-bottom"><div class="price">¥6.80<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="加厚款穿孔加宽坐带马扎" data-code="PC007">
+          <div class="product-img"><img src="images/mazha_PC007.jpg" alt="加厚款穿孔加宽坐带马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PC007</div>
+            <div class="product-name">加厚款穿孔加宽坐带马扎</div>
+            <div class="product-desc">40CM穿孔加宽坐带，重量2.20斤/1.10kg。</div>
+            <div class="product-bottom"><div class="price">¥8.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="绿色军工刺绣方管马扎" data-code="PJG008">
+          <div class="product-img"><img src="images/mazha_PJG008.jpg" alt="绿色军工刺绣方管马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#PJG008</div>
+            <div class="product-name">绿色军工刺绣方管马扎</div>
+            <div class="product-desc">40CM方形管，绿色军工刺绣坐带，重量1.80斤/0.90kg。</div>
+            <div class="product-bottom"><div class="price">¥6.80<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="加厚方管军工刺绣马扎" data-code="HJGF009">
+          <div class="product-img"><img src="images/mazha_HJGF009.jpg" alt="加厚方管军工刺绣马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#HJGF009</div>
+            <div class="product-name">加厚方管军工刺绣马扎</div>
+            <div class="product-desc">40CM方形加厚管，绿色军工刺绣坐带，坐带加宽加长，重量2.20斤/1.10kg。</div>
+            <div class="product-bottom"><div class="price">¥8.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="加厚圆管军工刺绣马扎" data-code="HJGY010">
+          <div class="product-img"><img src="images/mazha_HJGY010.jpg" alt="加厚圆管军工刺绣马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#HJGY010</div>
+            <div class="product-name">加厚圆管军工刺绣马扎</div>
+            <div class="product-desc">40CM圆形加厚管，绿色军工刺绣坐带，坐带加宽加长，重量2.20斤/1.10kg。</div>
+            <div class="product-bottom"><div class="price">¥8.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="特厚方管绿色坐带马扎" data-code="THF011">
+          <div class="product-img"><img src="images/mazha_THF011.jpg" alt="特厚方管绿色坐带马扎"></div>
+          <div class="product-info">
+            <div class="product-code">#THF011</div>
+            <div class="product-name">特厚方管绿色坐带马扎</div>
+            <div class="product-desc">40CM方形特厚管，绿色坐带，坐带加宽加长，重量2.70斤/1.35kg。</div>
+            <div class="product-bottom"><div class="price">¥10.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="彩色坐带靠背折叠椅" data-code="KBFC012">
+          <div class="product-img"><img src="images/mazha_KBFC012.jpg" alt="彩色坐带靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFC012</div>
+            <div class="product-name">彩色坐带靠背折叠椅</div>
+            <div class="product-desc">50CM方形管，彩色坐带，重量2.70斤/1.35kg。</div>
+            <div class="product-bottom"><div class="price">¥12.50<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="蓝色坐带靠背折叠椅" data-code="KBYPL013">
+          <div class="product-img"><img src="images/mazha_KBYPL013.jpg" alt="蓝色坐带靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBYPL013</div>
+            <div class="product-name">蓝色坐带靠背折叠椅</div>
+            <div class="product-desc">50CM圆形管，蓝色坐带，重量2.70斤/1.35kg。</div>
+            <div class="product-bottom"><div class="price">¥11.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="绿色军工刺绣靠背折叠椅" data-code="KBFPJG014">
+          <div class="product-img"><img src="images/mazha_KBFPJG014.jpg" alt="绿色军工刺绣靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFPJG014</div>
+            <div class="product-name">绿色军工刺绣靠背折叠椅</div>
+            <div class="product-desc">50CM方形管，绿色军工刺绣坐带，重量2.80斤/1.40kg。</div>
+            <div class="product-bottom"><div class="price">¥12.50<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="加厚方管军工刺绣靠背椅" data-code="KBFHJG015">
+          <div class="product-img"><img src="images/mazha_KBFHJG015.jpg" alt="加厚方管军工刺绣靠背椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFHJG015</div>
+            <div class="product-name">加厚方管军工刺绣靠背椅</div>
+            <div class="product-desc">50CM方形加厚管，绿色军工刺绣坐带，重量3.60斤/1.80kg。</div>
+            <div class="product-bottom"><div class="price">¥15.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="加厚圆管军工刺绣靠背椅" data-code="KBYHJG016">
+          <div class="product-img"><img src="images/mazha_KBYHJG016.jpg" alt="加厚圆管军工刺绣靠背椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBYHJG016</div>
+            <div class="product-name">加厚圆管军工刺绣靠背椅</div>
+            <div class="product-desc">50CM圆形加厚管，绿色军工刺绣坐带，坐带加宽加长，重量3.70斤/1.85kg。</div>
+            <div class="product-bottom"><div class="price">¥15.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="特厚方管绿色靠背折叠椅" data-code="KBFT017">
+          <div class="product-img"><img src="images/mazha_KBFT017.jpg" alt="特厚方管绿色靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFT017</div>
+            <div class="product-name">特厚方管绿色靠背折叠椅</div>
+            <div class="product-desc">50CM方形特厚管，绿色坐带，坐带加宽加长，重量4.40斤/2.20kg。</div>
+            <div class="product-bottom"><div class="price">¥17.50<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="特大加宽靠背折叠椅" data-code="KBFT018">
+          <div class="product-img"><img src="images/mazha_KBFT018.jpg" alt="特大加宽靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFT018</div>
+            <div class="product-name">特大加宽靠背折叠椅</div>
+            <div class="product-desc">55CM特大加宽加大坐带，重量4.20斤/2.10kg。</div>
+            <div class="product-bottom"><div class="price">¥19.50<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="穿孔坐带靠背折叠椅" data-code="KBFT019">
+          <div class="product-img"><img src="images/mazha_KBFT019.jpg" alt="穿孔坐带靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFT019</div>
+            <div class="product-name">穿孔坐带靠背折叠椅</div>
+            <div class="product-desc">55CM穿孔坐带，重量4.00斤/2.00kg。</div>
+            <div class="product-bottom"><div class="price">¥16.50<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="加宽加大坐带靠背折叠椅" data-code="KBFT020">
+          <div class="product-img"><img src="images/mazha_KBFT020.jpg" alt="加宽加大坐带靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFT020</div>
+            <div class="product-name">加宽加大坐带靠背折叠椅</div>
+            <div class="product-desc">55CM坐带加宽加大，重量4.00斤/2.00kg。</div>
+            <div class="product-bottom"><div class="price">¥16.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="轻便款穿孔坐带靠背折叠椅" data-code="KBFT021">
+          <div class="product-img"><img src="images/mazha_KBFT021.jpg" alt="轻便款穿孔坐带靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFT021</div>
+            <div class="product-name">轻便款穿孔坐带靠背折叠椅</div>
+            <div class="product-desc">55CM穿孔坐带，重量3.70斤/1.85kg。</div>
+            <div class="product-bottom"><div class="price">¥15.00<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="经济款穿孔坐带靠背折叠椅" data-code="KBFT022">
+          <div class="product-img"><img src="images/mazha_KBFT022.jpg" alt="经济款穿孔坐带靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFT022</div>
+            <div class="product-name">经济款穿孔坐带靠背折叠椅</div>
+            <div class="product-desc">55CM穿孔坐带，重量3.20斤/1.60kg。</div>
+            <div class="product-bottom"><div class="price">¥12.50<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="众合马扎" data-name="加宽坐带靠背折叠椅" data-code="KBFT023">
+          <div class="product-img"><img src="images/mazha_KBFT023.jpg" alt="加宽坐带靠背折叠椅"></div>
+          <div class="product-info">
+            <div class="product-code">#KBFT023</div>
+            <div class="product-name">加宽坐带靠背折叠椅</div>
+            <div class="product-desc">55CM坐带加宽，重量4.40斤/2.20kg。</div>
+            <div class="product-bottom"><div class="price">¥19.50<span> 起</span></div><div class="tag">众合马扎</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="LTY102 躺椅" data-code="LTY102">
+          <div class="product-img"><img src="images/tangyi_LTY102.jpg" alt="LTY102 躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#LTY102</div>
+            <div class="product-name">LTY102 躺椅</div>
+            <div class="product-desc">价格102元。</div>
+            <div class="product-bottom"><div class="price">¥102.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY105 二用椅" data-code="EYY105">
+          <div class="product-img"><img src="images/tangyi_EYY105.jpg" alt="EYY105 二用椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY105</div>
+            <div class="product-name">EYY105 二用椅</div>
+            <div class="product-desc">价格108元。</div>
+            <div class="product-bottom"><div class="price">¥108.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EEY107 加宽加长躺椅" data-code="EEY107">
+          <div class="product-img"><img src="images/tangyi_EEY107.jpg" alt="EEY107 加宽加长躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EEY107</div>
+            <div class="product-name">EEY107 加宽加长躺椅</div>
+            <div class="product-desc">加宽加长，价格119元。</div>
+            <div class="product-bottom"><div class="price">¥119.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY108 自动躺平躺椅" data-code="EYY108">
+          <div class="product-img"><img src="images/tangyi_EYY108.jpg" alt="EYY108 自动躺平躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY108</div>
+            <div class="product-name">EYY108 自动躺平躺椅</div>
+            <div class="product-desc">加宽加长，自动躺平，价格122元。</div>
+            <div class="product-bottom"><div class="price">¥122.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY301 自动支撑杆躺椅" data-code="EYY301">
+          <div class="product-img"><img src="images/tangyi_EYY301.jpg" alt="EYY301 自动支撑杆躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY301</div>
+            <div class="product-name">EYY301 自动支撑杆躺椅</div>
+            <div class="product-desc">牢固耐用，自动支撑杆，自动躺平，价格157元。</div>
+            <div class="product-bottom"><div class="price">¥157.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY906 加宽连体躺椅" data-code="EYY906">
+          <div class="product-img"><img src="images/tangyi_EYY906.jpg" alt="EYY906 加宽连体躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY906</div>
+            <div class="product-name">EYY906 加宽连体躺椅</div>
+            <div class="product-desc">加宽、连体，价格114元。</div>
+            <div class="product-bottom"><div class="price">¥114.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY719 加宽直立绒丝躺椅" data-code="EYY719">
+          <div class="product-img"><img src="images/tangyi_EYY719.jpg" alt="EYY719 加宽直立绒丝躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY719</div>
+            <div class="product-name">EYY719 加宽直立绒丝躺椅</div>
+            <div class="product-desc">加宽54cm，夹层直立绒丝，价格155元。</div>
+            <div class="product-bottom"><div class="price">¥155.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY722 夹层直立绒丝躺椅" data-code="EYY722">
+          <div class="product-img"><img src="images/tangyi_EYY722.jpg" alt="EYY722 夹层直立绒丝躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY722</div>
+            <div class="product-name">EYY722 夹层直立绒丝躺椅</div>
+            <div class="product-desc">夹层直立绒丝，价格145元。</div>
+            <div class="product-bottom"><div class="price">¥145.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY729 自动躺平直立绒丝躺椅" data-code="EYY729">
+          <div class="product-img"><img src="images/tangyi_EYY729.jpg" alt="EYY729 自动躺平直立绒丝躺椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY729</div>
+            <div class="product-name">EYY729 自动躺平直立绒丝躺椅</div>
+            <div class="product-desc">加宽加长，夹层直立绒丝，自动躺平，价格169元。</div>
+            <div class="product-bottom"><div class="price">¥169.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+
+        <article class="product-card" data-category="盈雅躺椅" data-name="EYY711 二用椅" data-code="EYY711">
+          <div class="product-img"><img src="images/tangyi_EYY711.jpg" alt="EYY711 二用椅"></div>
+          <div class="product-info">
+            <div class="product-code">#EYY711</div>
+            <div class="product-name">EYY711 二用椅</div>
+            <div class="product-desc">价格124元。</div>
+            <div class="product-bottom"><div class="price">¥124.00<span> 起</span></div><div class="tag">盈雅躺椅</div></div>
+            <div class="product-actions"><a class="call-mini" href="tel:13327594992">电话咨询</a><button class="wechat-mini" onclick="copyWechat()">复制微信</button></div>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section id="contact" class="contact-card">
+      <div><h2 class="section-title">联系我们</h2><p><strong>支持服务：</strong>线上选购、物流配送、批发零售、团购采购。</p><p><strong>适用场景：</strong>家庭日用、门店进货、摆摊采购、单位团购。</p><p><strong>店铺电话：</strong><a href="tel:13327594992">13327594992</a></p><p><strong>微信号：</strong>pw13324594992 <button class="copy-btn" onclick="copyWechat()">复制微信号</button></p><p><strong>店铺地址：</strong>山西省运城市新绛县汾河湾</p></div>
+      <div class="qr-box">欢迎添加微信：<br><strong>pw13324594992</strong><br>电话：13327594992</div>
+    </section>
+  </main>
+  <footer>© 2026 鹏伟家居｜价格实惠 · 批发零售 · 物流配送</footer>
+
+  <div class="mobile-contact-bar">
+    <a class="mobile-call" href="tel:13327594992">拨打电话</a>
+    <button class="mobile-wechat" onclick="copyWechat()">复制微信</button>
+  </div>
+  <script>
+    let currentCategory = 'all';
+    function filterProducts(category, btn) {
+      currentCategory = category;
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      btn.classList.add('active');
+      searchProducts();
+    }
+
+    function copyWechat() {
+      const wechat = 'pw13324594992';
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(wechat).then(() => alert('微信号已复制：' + wechat)).catch(() => fallbackCopy(wechat));
+      } else {
+        fallbackCopy(wechat);
+      }
+    }
+    function fallbackCopy(text) {
+      const input = document.createElement('input');
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      alert('微信号已复制：' + text);
+    }
+    function searchProducts() {
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+      document.querySelectorAll('.product-card').forEach(card => {
+        const cat = card.getAttribute('data-category');
+        const name = card.getAttribute('data-name').toLowerCase();
+        const code = card.getAttribute('data-code').toLowerCase();
+        const categoryOk = currentCategory === 'all' || cat === currentCategory;
+        const searchOk = !q || name.includes(q) || code.includes(q);
+        card.style.display = categoryOk && searchOk ? 'block' : 'none';
+      });
+    }
+
+
+    function isWeChatBrowser() {
+      return /MicroMessenger/i.test(navigator.userAgent || '');
+    }
+    function showWechatGuide() {
+      const guide = document.getElementById('wechatGuide');
+      if (guide) guide.style.display = 'flex';
+    }
+    function closeWechatGuide() {
+      const guide = document.getElementById('wechatGuide');
+      if (guide) guide.style.display = 'none';
+    }
+    function hideWechatGuide(event) {
+      if (event && event.target && event.target.id === 'wechatGuide') closeWechatGuide();
+    }
+    function copyCurrentLink() {
+      const link = window.location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(link).then(() => alert('网站链接已复制')).catch(() => fallbackCopyLink(link));
+      } else {
+        fallbackCopyLink(link);
+      }
+    }
+    function fallbackCopyLink(text) {
+      const input = document.createElement('input');
+      input.value = text;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      alert('网站链接已复制');
+    }
+    window.addEventListener('load', function () {
+      if (isWeChatBrowser()) {
+        const tip = document.getElementById('wechatTipBar');
+        if (tip) tip.style.display = 'block';
+        setTimeout(showWechatGuide, 600);
+      }
+    });
+
+  </script>
+</body>
+</html>
