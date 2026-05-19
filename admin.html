@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>鹏伟家居订单后台</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0} body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;background:#f7f3ed;color:#333;line-height:1.6}.wrap{max-width:1180px;margin:0 auto;padding:24px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}h1{color:#8b4a20;font-size:28px}.card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 10px 28px rgba(120,80,40,.08);margin-bottom:18px}.login{max-width:420px;margin:60px auto}.login input,.toolbar select{width:100%;border:1px solid #e4d3bf;border-radius:10px;padding:11px 12px;margin-top:8px;font-size:15px}.btn{border:0;border-radius:10px;padding:10px 14px;background:#8b4a20;color:#fff;font-weight:900;cursor:pointer}.btn.red{background:#e64340}.btn.light{background:#fff0e6;color:#8b4a20}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.stat{background:#fff7ea;border-radius:14px;padding:16px}.stat strong{display:block;color:#e64340;font-size:24px;margin-top:6px}.toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:980px}th,td{border-bottom:1px solid #eee;padding:12px;text-align:left;vertical-align:top;font-size:14px}th{color:#8b4a20;background:#fff7ea}.items{font-size:13px;color:#555;white-space:pre-line}.muted{color:#888;font-size:13px}.status{border:1px solid #e4d3bf;border-radius:8px;padding:6px}.hidden{display:none}.empty{text-align:center;color:#999;padding:40px}.top-actions{display:flex;gap:10px;align-items:center}@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}header{display:block}.top-actions{margin-top:12px}.wrap{padding:14px}h1{font-size:23px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div><h1>鹏伟家居订单后台</h1><div class="muted">查看订单、销售金额、浏览和商品点击情况</div></div>
+      <div class="top-actions"><a class="btn light" href="index.html">返回网站</a><button class="btn red hidden" id="logoutBtn" onclick="logout()">退出登录</button></div>
+    </header>
+
+    <section class="card login" id="loginCard">
+      <h2>管理员登录</h2>
+      <p class="muted">请输入在 Supabase Auth 创建的管理员邮箱和密码。</p>
+      <label>邮箱<input id="email" placeholder="admin@example.com"></label>
+      <label>密码<input id="password" type="password" placeholder="请输入密码"></label>
+      <button class="btn" style="width:100%;margin-top:14px" onclick="login()">登录后台</button>
+      <p class="muted" style="margin-top:12px">还没配置后台时，请先查看压缩包里的 setup.sql 和 README.md。</p>
+    </section>
+
+    <main id="adminApp" class="hidden">
+      <section class="stats">
+        <div class="stat">总订单数<strong id="statOrders">0</strong></div>
+        <div class="stat">销售金额<strong id="statSales">¥0</strong></div>
+        <div class="stat">浏览次数<strong id="statViews">0</strong></div>
+        <div class="stat">加入购物车<strong id="statCarts">0</strong></div>
+      </section>
+
+      <section class="card">
+        <div class="toolbar">
+          <h2>订单列表</h2>
+          <div style="display:flex;gap:10px;align-items:center">
+            <select id="statusFilter" onchange="renderOrders()"><option value="all">全部状态</option><option>待联系</option><option>已付款</option><option>已发货</option><option>已完成</option><option>已取消</option></select>
+            <button class="btn" onclick="loadData()">刷新</button>
+          </div>
+        </div>
+        <div class="table-wrap"><table><thead><tr><th>时间/单号</th><th>客户</th><th>商品</th><th>金额</th><th>状态</th><th>操作</th></tr></thead><tbody id="orderRows"></tbody></table></div>
+      </section>
+
+      <section class="card">
+        <h2>热门商品点击</h2>
+        <div class="table-wrap"><table><thead><tr><th>商品</th><th>编号</th><th>点击次数</th></tr></thead><tbody id="productRows"></tbody></table></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const cfg = window.PENGWEI_CONFIG || {};
+    const ready = cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY && !String(cfg.SUPABASE_URL).includes('替换');
+    const db = ready && window.supabase ? window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY) : null;
+    let orders = [];
+    let events = [];
+
+    async function checkSession(){
+      if(!db){ alert('后台还没有连接数据库，请先配置 config.js。'); return; }
+      const { data } = await db.auth.getSession();
+      if(data.session) showAdmin();
+    }
+    async function login(){
+      if(!db){ alert('后台还没有连接数据库，请先配置 config.js。'); return; }
+      const email=document.getElementById('email').value.trim();
+      const password=document.getElementById('password').value;
+      const { error } = await db.auth.signInWithPassword({email,password});
+      if(error){ alert('登录失败：'+error.message); return; }
+      showAdmin();
+    }
+    async function logout(){ await db.auth.signOut(); location.reload(); }
+    function showAdmin(){ document.getElementById('loginCard').classList.add('hidden'); document.getElementById('adminApp').classList.remove('hidden'); document.getElementById('logoutBtn').classList.remove('hidden'); loadData(); }
+
+    async function loadData(){
+      const { data: orderData, error: orderErr } = await db.from('orders').select('*').order('created_at',{ascending:false});
+      if(orderErr){ alert('读取订单失败：'+orderErr.message); return; }
+      const since = new Date(Date.now()-30*24*3600*1000).toISOString();
+      const { data: eventData } = await db.from('events').select('*').gte('created_at', since).order('created_at',{ascending:false}).limit(3000);
+      orders = orderData || []; events = eventData || [];
+      renderStats(); renderOrders(); renderProducts();
+    }
+    function money(n){ return '¥' + Number(n||0).toFixed(2); }
+    function renderStats(){
+      document.getElementById('statOrders').textContent=orders.length;
+      document.getElementById('statSales').textContent=money(orders.filter(o=>o.status!=='已取消').reduce((s,o)=>s+Number(o.total_amount||0),0));
+      document.getElementById('statViews').textContent=events.filter(e=>e.event_type==='page_view').length;
+      document.getElementById('statCarts').textContent=events.filter(e=>e.event_type==='add_cart').length;
+    }
+    function renderOrders(){
+      const filter=document.getElementById('statusFilter').value;
+      const list=filter==='all'?orders:orders.filter(o=>o.status===filter);
+      const rows=document.getElementById('orderRows');
+      if(!list.length){ rows.innerHTML='<tr><td colspan="6" class="empty">暂无订单</td></tr>'; return; }
+      rows.innerHTML=list.map(o=>{
+        const items=(o.items||[]).map(i=>`${i.code?'#'+i.code+' ':''}${i.name} × ${i.qty}，¥${Number(i.price).toFixed(2)}`).join('\n');
+        return `<tr><td><strong>${o.order_no}</strong><br><span class="muted">${new Date(o.created_at).toLocaleString()}</span></td><td>${o.customer_name}<br>${o.customer_phone}<br><span class="muted">${o.customer_address}</span>${o.customer_note?'<br><span class="muted">备注：'+o.customer_note+'</span>':''}</td><td class="items">${items}</td><td><strong>${money(o.total_amount)}</strong></td><td><select class="status" onchange="updateStatus(${o.id}, this.value)">${['待联系','已付款','已发货','已完成','已取消'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></td><td><button class="btn light" onclick="copyOrder(${o.id})">复制订单</button></td></tr>`
+      }).join('');
+    }
+    async function updateStatus(id,status){ const {error}=await db.from('orders').update({status}).eq('id',id); if(error){alert('更新失败：'+error.message);return;} const o=orders.find(x=>x.id===id); if(o)o.status=status; renderStats(); }
+    function copyOrder(id){
+      const o=orders.find(x=>x.id===id); if(!o)return;
+      const lines=[`订单：${o.order_no}`,`客户：${o.customer_name}`,`电话：${o.customer_phone}`,`地址：${o.customer_address}`];
+      (o.items||[]).forEach((i,n)=>lines.push(`${n+1}. ${i.code?'#'+i.code+' ':''}${i.name} × ${i.qty}，¥${Number(i.price).toFixed(2)}`));
+      lines.push(`合计：${money(o.total_amount)}`,`状态：${o.status}`);
+      navigator.clipboard.writeText(lines.join('\n')).then(()=>alert('订单已复制'));
+    }
+    function renderProducts(){
+      const map={};
+      events.filter(e=>e.event_type==='product_view').forEach(e=>{ const p=e.payload||{}; const key=p.code||p.name||'未知商品'; if(!map[key]) map[key]={code:p.code||'',name:p.name||key,count:0}; map[key].count++; });
+      const rows=Object.values(map).sort((a,b)=>b.count-a.count).slice(0,20);
+      document.getElementById('productRows').innerHTML=rows.length?rows.map(p=>`<tr><td>${p.name}</td><td>${p.code||'-'}</td><td>${p.count}</td></tr>`).join(''):'<tr><td colspan="3" class="empty">暂无商品点击数据</td></tr>';
+    }
+    checkSession();
+  </script>
+</body>
+</html>

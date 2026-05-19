@@ -131,11 +131,27 @@
     .cart-footer { border-top:1px solid #eee; padding:16px 18px calc(16px + env(safe-area-inset-bottom)); background:#fff; }
     .cart-total { display:flex; align-items:center; justify-content:space-between; font-size:16px; margin-bottom:12px; }
     .cart-total strong { color:#e64340; font-size:22px; }
-    .cart-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .cart-actions { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; }
     .cart-action { border:0; border-radius:12px; padding:12px 8px; font-weight:900; cursor:pointer; }
     .cart-action.primary { background:#e64340; color:#fff; }
     .cart-action.secondary { background:#fff7ea; color:#8b4a20; }
     .cart-note { font-size:12px; color:#888; margin-top:10px; line-height:1.5; }
+
+    /* 订单提交弹窗 */
+    .checkout-mask { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1200; display:none; align-items:center; justify-content:center; padding:18px; }
+    .checkout-mask.open { display:flex; }
+    .checkout-modal { width:min(560px,96vw); max-height:92vh; background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 18px 50px rgba(0,0,0,.26); display:flex; flex-direction:column; }
+    .checkout-header { padding:18px 18px 14px; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between; }
+    .checkout-header h3 { font-size:20px; color:#8b4a20; }
+    .checkout-body { padding:16px 18px; overflow:auto; }
+    .checkout-summary { background:#fff7ea; border-radius:12px; padding:12px; color:#6f3b1b; font-size:14px; margin-bottom:14px; line-height:1.7; }
+    .checkout-body label { display:block; font-weight:800; color:#333; margin-bottom:12px; }
+    .checkout-body input, .checkout-body textarea { width:100%; margin-top:6px; border:1px solid #e4d3bf; border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; outline:none; }
+    .checkout-body input:focus, .checkout-body textarea:focus { border-color:#8b4a20; box-shadow:0 0 0 3px rgba(139,74,32,.08); }
+    .checkout-tip { color:#888; font-size:12px; line-height:1.6; }
+    .checkout-footer { display:grid; grid-template-columns:1fr 1fr; gap:10px; border-top:1px solid #eee; padding:14px 18px calc(14px + env(safe-area-inset-bottom)); }
+    @media(max-width:560px){ .checkout-mask { align-items:flex-end; padding:0; } .checkout-modal { width:100vw; max-height:92vh; border-radius:18px 18px 0 0; } .cart-actions { grid-template-columns:1fr; } }
+
     @media(max-width:560px) {
       .product-bottom { align-items:flex-start; }
       .cart-add-btn { padding:7px 10px; }
@@ -626,9 +642,10 @@
       <div class="cart-total"><span>合计</span><strong id="cartTotal">¥0.00</strong></div>
       <div class="cart-actions">
         <button class="cart-action secondary" onclick="copyCartText()">复制清单</button>
-        <button class="cart-action primary" onclick="callShop()">电话下单</button>
+        <button class="cart-action primary" onclick="openCheckout()">提交订单</button>
+        <button class="cart-action secondary" onclick="callShop()">电话下单</button>
       </div>
-      <div class="cart-note">提示：当前为展示网站购物车，暂不支持在线支付。复制清单后可通过微信 pw13324594992 发送给店主确认库存、配送和批发价格。</div>
+      <div class="cart-note">提示：提交订单后，商家会联系你确认库存、运费、付款和配送。后台配置完成后，订单会同步到管理后台。</div>
     </div>
   </aside>
   <button class="cart-float" onclick="openCart()">🛒 购物车 <span class="cart-count" id="cartCount">0</span></button>
@@ -640,12 +657,38 @@
     <button class="mobile-wechat" onclick="copyWechat()">复制微信</button>
   </div>
 
+  <div class="checkout-mask" id="checkoutMask" onclick="closeCheckout()">
+    <section class="checkout-modal" onclick="event.stopPropagation()" aria-label="提交订单">
+      <div class="checkout-header">
+        <h3>提交订单</h3>
+        <button class="cart-close" onclick="closeCheckout()">×</button>
+      </div>
+      <div class="checkout-body">
+        <div class="checkout-summary" id="checkoutSummary"></div>
+        <label>姓名/称呼<input id="customerName" placeholder="请输入收货人姓名" /></label>
+        <label>联系电话<input id="customerPhone" placeholder="请输入手机号" inputmode="tel" /></label>
+        <label>收货地址<textarea id="customerAddress" rows="3" placeholder="请输入详细收货地址"></textarea></label>
+        <label>备注<textarea id="customerNote" rows="2" placeholder="例如：配送时间、批发数量、其他要求"></textarea></label>
+        <div class="checkout-tip">提交后，商家会通过电话或微信联系你确认库存、运费、付款和配送。</div>
+      </div>
+      <div class="checkout-footer">
+        <button class="cart-action secondary" onclick="closeCheckout()">取消</button>
+        <button class="cart-action primary" onclick="submitOrder()">确认提交</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     let currentCategory = 'all';
     let cart = JSON.parse(localStorage.getItem('pengweiCart') || '[]');
     let detailProduct = null;
     let detailQty = 1;
     let detailSpec = '默认规格';
+    const siteConfig = window.PENGWEI_CONFIG || {};
+    const supabaseReady = siteConfig.SUPABASE_URL && siteConfig.SUPABASE_ANON_KEY && !String(siteConfig.SUPABASE_URL).includes('替换');
+    const dbClient = supabaseReady && window.supabase ? window.supabase.createClient(siteConfig.SUPABASE_URL, siteConfig.SUPABASE_ANON_KEY) : null;
 
     function filterProducts(category, btn) {
       currentCategory = category;
@@ -707,6 +750,7 @@
     }
 
     function addToCart(product, qty = 1) {
+      recordEvent('add_cart', { code: product.code, name: product.name, price: product.price, qty });
       const existing = cart.find(item => item.id === product.id);
       if (existing) {
         existing.qty += qty;
@@ -718,6 +762,7 @@
     }
 
     function openProductDetail(product) {
+      recordEvent('product_view', { code: product.code, name: product.name, price: product.price });
       detailProduct = product;
       detailQty = 1;
       detailSpec = '默认规格';
@@ -847,9 +892,105 @@
       window.location.href = 'tel:13327594992';
     }
 
+
+    async function recordEvent(eventType, payload = {}) {
+      if (!dbClient) return;
+      try {
+        await dbClient.from('events').insert({
+          event_type: eventType,
+          payload,
+          page_url: location.href,
+          user_agent: navigator.userAgent
+        });
+      } catch (err) {
+        console.warn('记录访问数据失败：', err);
+      }
+    }
+
+    function openCheckout() {
+      if (!cart.length) {
+        alert('购物车暂无商品，请先加入商品。');
+        return;
+      }
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const lines = cart.map(item => `${item.code ? '#' + item.code + ' ' : ''}${item.name} × ${item.qty}`).join('<br>');
+      document.getElementById('checkoutSummary').innerHTML = `<strong>订单商品：</strong><br>${lines}<br><strong>合计：</strong>¥${total.toFixed(2)}`;
+      document.getElementById('checkoutMask').classList.add('open');
+    }
+
+    function closeCheckout() {
+      document.getElementById('checkoutMask').classList.remove('open');
+    }
+
+    function getOrderText(orderNo, customer) {
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const lines = [`鹏伟家居订单：${orderNo}`];
+      cart.forEach((item, index) => {
+        lines.push(`${index + 1}. ${item.code ? '#' + item.code + ' ' : ''}${item.name} × ${item.qty}，单价 ¥${item.price.toFixed(2)}，小计 ¥${(item.price * item.qty).toFixed(2)}`);
+      });
+      lines.push(`合计：¥${total.toFixed(2)}`);
+      lines.push(`客户：${customer.name}`);
+      lines.push(`电话：${customer.phone}`);
+      lines.push(`地址：${customer.address}`);
+      if (customer.note) lines.push(`备注：${customer.note}`);
+      return lines.join('\n');
+    }
+
+    async function submitOrder() {
+      const customer = {
+        name: document.getElementById('customerName').value.trim(),
+        phone: document.getElementById('customerPhone').value.trim(),
+        address: document.getElementById('customerAddress').value.trim(),
+        note: document.getElementById('customerNote').value.trim()
+      };
+      if (!customer.name || !customer.phone || !customer.address) {
+        alert('请填写姓名、联系电话和收货地址。');
+        return;
+      }
+      if (!cart.length) {
+        alert('购物车暂无商品。');
+        return;
+      }
+      const orderNo = 'PW' + Date.now();
+      const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      const orderPayload = {
+        order_no: orderNo,
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        customer_address: customer.address,
+        customer_note: customer.note,
+        items: cart.map(item => ({ code:item.code, name:item.name, category:item.category, price:item.price, qty:item.qty, img:item.img })),
+        total_amount: Number(total.toFixed(2)),
+        status: '待联系'
+      };
+
+      if (dbClient) {
+        const { error } = await dbClient.from('orders').insert(orderPayload);
+        if (error) {
+          console.error('订单提交失败：', error);
+          alert('订单提交失败，请检查后台配置；你也可以先复制清单发给店主。');
+          return;
+        }
+        await recordEvent('order_submit', { order_no: orderNo, total: total });
+        alert('订单已提交成功，商家会尽快联系你确认付款和配送。');
+      } else {
+        const localOrders = JSON.parse(localStorage.getItem('pengweiLocalOrders') || '[]');
+        localOrders.unshift({ ...orderPayload, created_at: new Date().toISOString() });
+        localStorage.setItem('pengweiLocalOrders', JSON.stringify(localOrders));
+        copyText(getOrderText(orderNo, customer), '后台尚未连接数据库，订单已复制。请粘贴到微信发送给店主。');
+      }
+
+      cart = [];
+      saveCart();
+      closeCheckout();
+      closeCart();
+    }
+
+
     document.addEventListener('DOMContentLoaded', function() {
       setupCartButtons();
       renderCart();
+      recordEvent('page_view', { title: document.title });
     });
   </script>
 
